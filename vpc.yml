@@ -6,10 +6,10 @@ Parameters:
     Type: String
     
 Resources:
-  salesVPC:
+  AuroraVPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: !Ref vpcCIDR
+      CidrBlock: "10.0.0.0/24"
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags: 
@@ -18,7 +18,7 @@ Resources:
         - Key: "CostCenter"
           Value: "18654"
         - Key: "Name"
-          Value: "salesVPC"
+          Value: "auroraVPC"
           
           
   InternetGateway:
@@ -26,29 +26,29 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: Sales-IG
+          Value: Aurora-IG
         
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref salesVPC
+      VpcId: !Ref AuroraVPC
 
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref salesVPC
+      VpcId: !Ref AuroraVPC
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name             
-          Value: Sales Public Subnet 1
+          Value: Aurora Public Subnet 1
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref salesVPC
+      VpcId: !Ref AuroraVPC
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       CidrBlock: 10.0.11.0/24
       MapPublicIpOnLaunch: false
@@ -66,10 +66,10 @@ Resources:
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref salesVPC
+      VpcId: !Ref AuroraVPC
       Tags:
         - Key: Name
-          Value: Sales VPC Public Routes
+          Value: Aurora VPC Public Routes
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -86,7 +86,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       
 
-  SalesSSHSecurityGroup:
+  AuroraSSHSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: SSH Traffic
