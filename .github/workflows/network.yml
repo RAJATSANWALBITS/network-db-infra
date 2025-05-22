@@ -1,5 +1,5 @@
 
-name: Oracle-Sales-RDS-Stack-Deploy
+name: Oracle-Network-deploy
 on:
   push:
     branches: [ "main" ]
