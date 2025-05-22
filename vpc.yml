@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template to create a new VPC
+
+Parameters:
+  vpcCIDR:
+    Type: String
+    
+Resources:
+  salesVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref vpcCIDR
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags: 
+        - Key: "BU"
+          Value: "ERAS"
+        - Key: "CostCenter"
+          Value: "18654"
+        - Key: "Name"
+          Value: "salesVPC"
+          
+          
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Sales-IG
+        
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref salesVPC
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref salesVPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name             
+          Value: Sales Public Subnet 1
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref salesVPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.0.11.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Sales Private Subnet 1
+    
+   
+   
+   
+   
+   
+   
+   
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref salesVPC
+      Tags:
+        - Key: Name
+          Value: Sales VPC Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+      
+
+  SalesSSHSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SSH Traffic
+      SecurityGroupIngress:
+        - IpProtocol: TCP
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref salesVPC
+      Tags:
+        - Key : Name
+          Value : SalesServerSSHSecurityGroup
+      
+      
+  SalesServer:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-0d682f26195e9ec0f
+      KeyName : stack-keys
+      SubnetId : !Ref PublicSubnet1
+      SecurityGroupIds: 
+        - !Ref SalesSSHSecurityGroup
+      InstanceType: t2.micro
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdm
+          Ebs:
+            VolumeType: gp2
+            DeleteOnTermination: true
+            VolumeSize: 20
+      Tags:
+        - Key : Name
+          Value : SalesServer
+           
+Outputs:
+  VPCId:
+    Description: New VPC ID
+    Value: !Ref salesVPC
+  SubnetId:
+    Description: New Subnet ID
+    Value: !Ref PublicSubnet1
+  SecurityGroupId:
+    Description: New Security Group ID
+    Value: !Ref SalesSSHSecurityGroup
+  EC2InstanceId:
+    Description: New EC2 Instance ID
+    Value: !Ref SalesServer
