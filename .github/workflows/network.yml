@@ -25,7 +25,7 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          aws cloudformation validate-template --template-body file://vpc.yaml
+          aws cloudformation validate-template --template-body file://vpc.yml
            
 
   # This workflow contains a single job called "build"
@@ -169,7 +169,7 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          aws cloudformation create-change-set --stack-name network-stack --change-set-name ${{env.CHANGE_SET_NAME}} --template-body file://vpc.yaml --parameters ParameterKey=NetworkStack,UsePreviousValue=true
+          aws cloudformation create-change-set --stack-name network-stack --change-set-name ${{env.CHANGE_SET_NAME}} --template-body file://vpc.yml --parameters ParameterKey=NetworkStack,UsePreviousValue=true
           echo "Waiting for change set to be created successfully."
           aws cloudformation wait change-set-create-complete --stack-name network-stack --change-set-name ${{ env.CHANGE_SET_NAME }}
           echo "change set created !!"
