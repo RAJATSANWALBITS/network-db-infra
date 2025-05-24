@@ -197,7 +197,7 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          aws cloudformation execute-change-set --change-set-name ${{ needs.Prod-Create-Changeset.outputs.GLOBAL_CHANGE_SET_NAME }} --stack-name vpc-stack
-          aws cloudformation wait stack-update-complete --stack-name vpc-stack
+          aws cloudformation execute-change-set --change-set-name ${{ needs.Prod-Create-Changeset.outputs.GLOBAL_CHANGE_SET_NAME }} --stack-name network-stack
+          aws cloudformation wait stack-update-complete --stack-name network-stack
           echo "Change set execution completed successfully!"
  
