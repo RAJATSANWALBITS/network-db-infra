@@ -25,7 +25,7 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          aws cloudformation validate-template --template-body file://rds.yaml
+          aws cloudformation validate-template --template-body file://vpc.yaml
            
 
   # This workflow contains a single job called "build"
@@ -169,11 +169,11 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          aws cloudformation create-change-set --stack-name rds-stack --change-set-name ${{env.CHANGE_SET_NAME}} --template-body file://rds.yaml --parameters ParameterKey=NetworkStack,UsePreviousValue=true
+          aws cloudformation create-change-set --stack-name network-stack --change-set-name ${{env.CHANGE_SET_NAME}} --template-body file://vpc.yaml --parameters ParameterKey=NetworkStack,UsePreviousValue=true
           echo "Waiting for change set to be created successfully."
-          aws cloudformation wait change-set-create-complete --stack-name rds-stack --change-set-name ${{ env.CHANGE_SET_NAME }}
+          aws cloudformation wait change-set-create-complete --stack-name network-stack --change-set-name ${{ env.CHANGE_SET_NAME }}
           echo "change set created !!"
-          aws cloudformation describe-change-set --output table --color on --stack-name rds-stack --change-set-name ${{env.CHANGE_SET_NAME}}
+          aws cloudformation describe-change-set --output table --color on --stack-name network-stack --change-set-name ${{env.CHANGE_SET_NAME}}
           
   Prod-Deploy-changeset:
     needs: [ Prod-Create-Changeset ]
@@ -186,19 +186,18 @@ jobs:
        # run: |
         #  mkdir -p python
          # pip install oracledb -t python
-      - name: Sync Central s3 bucket
-        run: |
-            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws configure set region ${{ vars.AWS_REGION }}        
-            aws s3 sync . s3://mys3bucketnewlti/sales-oracle-db-infra --exclude '.git/*' --exclude '.gitignore/*' --exclude '.github/*'
+      #- name: Sync Central s3 bucket
+        #run: |
+         #   aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          #  aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           # aws configure set region ${{ vars.AWS_REGION }}        
+            #aws s3 sync . s3://mys3bucketnewlti/sales-oracle-db-infra --exclude '.git/*' --exclude '.gitignore/*' --exclude '.github/*'
       - name: Deploy Change Set
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ vars.AWS_REGION }}    
-          echo "Printing the Global variable - ${{ needs.generate-name.outputs.GLOBAL_CHANGE_SET_NAME }}"
-          aws cloudformation execute-change-set --change-set-name ${{ needs.Prod-Create-Changeset.outputs.GLOBAL_CHANGE_SET_NAME }} --stack-name rds-stack
-          aws cloudformation wait stack-update-complete --stack-name rds-stack
+          aws cloudformation execute-change-set --change-set-name ${{ needs.Prod-Create-Changeset.outputs.GLOBAL_CHANGE_SET_NAME }} --stack-name vpc-stack
+          aws cloudformation wait stack-update-complete --stack-name vpc-stack
           echo "Change set execution completed successfully!"
  
