@@ -66,6 +66,17 @@ Resources:
       Tags:
         - Key: Name
           Value: Sales Private Subnet 1
+          
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref salesVPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.0.12.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Sales Private Subnet 2  
     
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
