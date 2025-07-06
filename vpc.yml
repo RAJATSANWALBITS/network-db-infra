@@ -143,6 +143,17 @@ Outputs:
     Export:
       Name: !Join ['', [!Ref "AWS::StackName", "PublicSubnet2Id"]]
 
+  PrivateSubnet1SubnetId:
+    Value: !GetAtt PrivateSubnet1.SubnetId
+    Export:
+      Name: !Join ['', [!Ref "AWS::StackName", "PrivateSubnet1Id"]]
+
+
+  PrivateSubnet2SubnetId:
+    Value: !GetAtt PrivateSubnet2.SubnetId
+    Export:
+      Name: !Join ['', [!Ref "AWS::StackName", "PrivateSubnet2Id"]]
+      
   SecurityGroupName:
     Value: !GetAtt SalesSSHSecurityGroup.GroupId
     Export:
